@@ -1,0 +1,15 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    line-bot-api (1.2.2)
+    oauth (0.5.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  line-bot-api
+  oauth
+
+BUNDLED WITH
+   1.11.2
