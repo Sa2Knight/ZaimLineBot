@@ -13,9 +13,8 @@ class MessageBuilder
   # 全ての支払い情報のメッセージを構築する
   #
   def build_all(header: nil, footer: nil, break_lines_num: 2)
-    @moneys.empty? and return "#{title}\n該当の支払いはありません"
-
     break_line = "\n" * break_lines_num
+    @moneys.empty? and return [header, '該当の支払いはありません'].join(break_line)
     body = @moneys.map(&method(:build)).join(break_line)
     [header, body, footer].compact.join(break_line)
   end

@@ -36,17 +36,35 @@ class ZaimClient
   end
 
   #
+  # 支出の一覧を取得する
+  # 期間の指定がない場合、本日を対象にする
+  # HACK: fetch_incomesと一緒やん
+  #
+  def fetch_payments(option = {})
+    params = {
+      mode: 'payment',
+      start_date: Date.today.to_s,
+      end_date:   Date.today.to_s
+    }.merge(option)
+    fetch_moneys(params)
+  end
+
+  #
   # 公費の一覧を取得する
   # 期間の指定がない場合、本日を対象にする
   #
   def fetch_public_payments(option = {})
-    params = {
-      mode: 'payment',
-      start_date: Date.today.to_s,
-      end_date:   Date.today.to_s,
-    }.merge(option)
-    moneys = fetch_moneys(params)
+    moneys = fetch_payments(option)
     return select_public_payments(moneys)
+  end
+
+  #
+  # 私費の一覧を取得する
+  # 期間の指定がない場合、本日を対象にする
+  #
+  def fetch_private_payments(option = {})
+    moneys = fetch_payments(option)
+    return select_private_payments(moneys)
   end
 
   #
@@ -78,6 +96,16 @@ class ZaimClient
     def select_public_payments(moneys)
       moneys.select do |money|
         money['mode'] == 'payment' && money['comment'].index('公費')
+      end
+    end
+
+    #
+    # 支払い一覧から、コメントに「私費」を含むものを取り出す
+    # HACK: select_public_paymentsと一緒やん
+    #
+    def select_private_payments(moneys)
+      moneys.select do |money|
+        money['mode'] == 'payment' && money['comment'].index('私費')
       end
     end
 
