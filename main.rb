@@ -12,8 +12,14 @@ require_relative 'src/message_builder'
 def send_public_payments_info(date = Date.today)
   title  = "#{date} の公費一覧です"
   moneys = @zaim.fetch_public_payments(date: date)
+  total  = @zaim.get_total_amount
   message_builder = MessageBuilder.new(moneys)
-  @line.reply(text: message_builder.build_all(title: title))
+  @line.reply(
+    text: message_builder.build_all(
+      header: "#{date} の公費一覧です",
+      footer: "合計 #{total} 円"
+    )
+  )
 end
 
 #

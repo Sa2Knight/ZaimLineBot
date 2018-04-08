@@ -20,6 +20,7 @@ class ZaimClient
     @access_token = OAuth::AccessToken.new(
       @consumer, ENV['ZAIM_TOKEN'], ENV['ZAIM_TOKEN_SECRET']
     )
+    @moneys = []
   end
 
   #
@@ -31,8 +32,15 @@ class ZaimClient
       start_date: date.to_s,
       end_date: date.to_s
     }
-    moneys = fetch_moneys(params)
-    select_public_payments(moneys)
+    @moneys = fetch_moneys(params)
+    @moneys = select_public_payments
+  end
+
+  #
+  # 支払い一覧から、金額の合計を取得する
+  #
+  def get_total_amount
+    @moneys.reduce(0) { |sum, acm| sum += acm['amount'] }
   end
 
   private
@@ -40,8 +48,8 @@ class ZaimClient
     #
     # 支払い一覧から、コメントに「公費」を含むものを取り出す
     #
-    def select_public_payments(moneys)
-      moneys.select do |money|
+    def select_public_payments
+      @moneys.select do |money|
         money['mode'] == 'payment' && money['comment'].index('公費')
       end
     end
@@ -52,7 +60,7 @@ class ZaimClient
     def fetch_moneys(params = {})
       url = 'home/money'
       response = get(url, params)
-      return response['money'] if response
+      response['money'] if response
     end
 
     #
