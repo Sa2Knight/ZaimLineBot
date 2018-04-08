@@ -7,12 +7,15 @@ require_relative 'src/message_builder'
 @line = LineClient.new
 
 #
-# 本日の公費記録をLineで通知する
+# 特定日の公費記録一覧をLineで通知する
 #
-def send_public_payments_info(date = Date.today)
+def send_public_payments_info(date_info)
+  unless date = make_date_by(date_info)
+    return @line.reply(text: MessageBuilder.help)
+  end
   title  = "#{date} の公費一覧です"
-  moneys = @zaim.fetch_public_payments(date: date)
-  total  = @zaim.get_total_amount
+  moneys = @zaim.fetch_public_payments(start_date: date, end_date: date)
+  total  = @zaim.get_total_amount(moneys)
   message_builder = MessageBuilder.new(moneys)
   @line.reply(
     text: message_builder.build_all(
@@ -20,6 +23,15 @@ def send_public_payments_info(date = Date.today)
       footer: "合計 #{total} 円"
     )
   )
+end
+
+#
+# 特定月の公費残高をLineで通知する
+#
+def send_public_budget_info(month_info)
+  date   = make_month_by(month_info)
+  budget = @zaim.fetch_month_public_budget(date)
+  @line.reply(text: "#{budget} 円")
 end
 
 #
@@ -43,12 +55,20 @@ def make_date_by(str)
   return Date.parse(str) rescue false
 end
 
+#
+# 月を表す文字列から当該月初日のDateオブジェクトを生成する
+#
+def make_month_by(str)
+  # 今月
+  return Date.today if str == '今月'
+end
+
 # メッセージを解析して各種メソッドを呼び出す
 message = Util.get_event_message
-if md = message.match(/(.+)の公費一覧/)
-  if date = make_date_by(md[1])
-    send_public_payments_info(date)
-  else
-    @line.reply(text: MessageBuilder.help)
-  end
+if md = message.match(/(.+)の公費残額/)
+  send_public_budget_info(md[1])
+elsif message == '私費残額'
+  @line.reply(text: '私費残額だっよ')
+elsif md = message.match(/(.+)の公費一覧/)
+  send_public_payments_info(md[1])
 end

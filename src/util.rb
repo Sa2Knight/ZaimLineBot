@@ -14,6 +14,16 @@ class Util
   end
 
   #
+  # Dateオブジェクトを渡して、その月の初日と最終日を含んだハッシュを戻す
+  #
+  def self.get_month_hash(date)
+    {
+      start_date: Date.new(date.year, date.month, 1),
+      end_date:   Date.new(date.year, date.month, -1)
+    }
+  end
+
+  #
   # /tmpに置いてあるファイルを開く
   #
   def self.load_event_json(parse: false)

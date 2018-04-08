@@ -3,6 +3,7 @@ require 'date'
 
 class ZaimClient
   API_URL = 'https://api.zaim.net/v2/'.freeze
+  POCKET_MONEY = 50000
 
   #
   # ZaimAPIへのアクセストークンを生成する
@@ -20,27 +21,53 @@ class ZaimClient
     @access_token = OAuth::AccessToken.new(
       @consumer, ENV['ZAIM_TOKEN'], ENV['ZAIM_TOKEN_SECRET']
     )
-    @moneys = []
   end
 
   #
-  # 日付を指定して本日の公費を取得する
+  # 収入の一覧を取得する
+  # 期間の指定がない場合、今月を対象にする
   #
-  def fetch_public_payments(date: Date.today)
+  def fetch_incomes(option = {})
+    params = {
+      mode: 'income'
+    }.merge(Util.get_month_hash(Date.today))
+     .merge(option)
+    fetch_moneys(params)
+  end
+
+  #
+  # 公費の一覧を取得する
+  # 期間の指定がない場合、本日を対象にする
+  #
+  def fetch_public_payments(option = {})
     params = {
       mode: 'payment',
-      start_date: date.to_s,
-      end_date: date.to_s
-    }
-    @moneys = fetch_moneys(params)
-    @moneys = select_public_payments
+      start_date: Date.today.to_s,
+      end_date:   Date.today.to_s,
+    }.merge(option)
+    moneys = fetch_moneys(params)
+    return select_public_payments(moneys)
+  end
+
+  #
+  # 当該月の公費残額を取得する
+  #
+  def fetch_month_public_budget(date)
+    month_hash = Util.get_month_hash(date)
+    payments = self.fetch_public_payments(month_hash)
+    incomes  = self.fetch_incomes(month_hash)
+
+    budget = get_total_amount(incomes)\
+               - get_total_amount(payments)\
+               - POCKET_MONEY
+    return budget
   end
 
   #
   # 支払い一覧から、金額の合計を取得する
   #
-  def get_total_amount
-    @moneys.reduce(0) { |sum, acm| sum += acm['amount'] }
+  def get_total_amount(moneys)
+    moneys.reduce(0) { |sum, acm| sum += acm['amount'] }
   end
 
   private
@@ -48,8 +75,8 @@ class ZaimClient
     #
     # 支払い一覧から、コメントに「公費」を含むものを取り出す
     #
-    def select_public_payments
-      @moneys.select do |money|
+    def select_public_payments(moneys)
+      moneys.select do |money|
         money['mode'] == 'payment' && money['comment'].index('公費')
       end
     end
