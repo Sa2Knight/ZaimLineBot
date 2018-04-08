@@ -26,12 +26,17 @@ def send_public_payments_info(date_info)
 end
 
 #
-# 特定月の公費残高をLineで通知する
+# 特定月の公費及び私費残額をLineで通知する
 #
-def send_public_budget_info(month_info)
+def send_budget_info(month_info)
   date   = make_month_by(month_info)
-  budget = @zaim.fetch_month_public_budget(date)
-  @line.reply(text: "#{budget} 円")
+  public_budget  = @zaim.fetch_month_public_budget(date)
+  private_budget = @zaim.fetch_month_private_budget(date)
+  text = [
+    "公費: #{public_budget} 円",
+    "私費: #{private_budget} 円"
+  ].join("\n")
+  @line.reply(text: text)
 end
 
 #
@@ -65,10 +70,8 @@ end
 
 # メッセージを解析して各種メソッドを呼び出す
 message = Util.get_event_message
-if md = message.match(/(.+)の公費残額/)
-  send_public_budget_info(md[1])
-elsif message == '私費残額'
-  @line.reply(text: '私費残額だっよ')
+if md = message.match(/(.+)の残額/)
+  send_budget_info(md[1])
 elsif md = message.match(/(.+)の公費一覧/)
   send_public_payments_info(md[1])
 end

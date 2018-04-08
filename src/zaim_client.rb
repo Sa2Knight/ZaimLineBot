@@ -82,6 +82,16 @@ class ZaimClient
   end
 
   #
+  # 当該月の私費残額を確認する
+  #
+  def fetch_month_private_budget(date)
+    month_hash = Util.get_month_hash(date)
+    payments = self.fetch_private_payments(month_hash)
+    budget = POCKET_MONEY - get_total_amount(payments)
+    return budget
+  end
+
+  #
   # 支払い一覧から、金額の合計を取得する
   #
   def get_total_amount(moneys)
