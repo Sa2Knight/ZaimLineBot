@@ -1,6 +1,10 @@
 require 'line/bot'
 class LineClient
 
+  ACCEPT_USERS = [
+    'Uebc4ef7c800415f9b0127e9f8d557c3f'
+  ].freeze
+
   #
   # 環境変数からトークンを取得して、クライアントの準備を行う
   #
@@ -15,6 +19,7 @@ class LineClient
   # メッセージを返信する
   #
   def reply(text:)
+    return unless ACCEPT_USERS.include? event['source']['userId']
     message = { type: 'text', text: text }
     @client.reply_message(event['replyToken'], message)
   end
