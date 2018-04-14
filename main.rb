@@ -9,17 +9,21 @@ require_relative 'src/message_builder'
 #
 # 特定日の公費記録一覧をLineで通知する
 #
-def send_public_payments_info(date_info)
+def send_public_payments_info(date_info, type)
   unless date = make_date_by(date_info)
     return @line.reply(text: MessageBuilder.help)
   end
-  title  = "#{date} の公費一覧です"
-  moneys = @zaim.fetch_public_payments(start_date: date, end_date: date)
+  title  = "#{date} の#{type}一覧です"
+  moneys = if type == '公費'
+             @zaim.fetch_public_payments(start_date: date, end_date: date)
+           else
+             @zaim.fetch_private_payments(start_date: date, end_date: date)
+           end
   total  = @zaim.get_total_amount(moneys)
   message_builder = MessageBuilder.new(moneys)
   @line.reply(
     text: message_builder.build_all(
-      header: "#{date} の公費一覧です",
+      header: title,
       footer: "合計 #{total} 円"
     )
   )
@@ -72,6 +76,6 @@ end
 message = Util.get_event_message
 if md = message.match(/(.+)の残額/)
   send_budget_info(md[1])
-elsif md = message.match(/(.+)の公費一覧/)
-  send_public_payments_info(md[1])
+elsif md = message.match(/(.+)の(公費|私費)一覧/)
+  send_public_payments_info(md[1], md[2])
 end
