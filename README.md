@@ -1,6 +1,8 @@
 # ZaimLineBot
 個人用 Zaimの集計情報を問い合わせると教えてくれるLineBot
 
+[詳細はQiitaに投稿しました](https://qiita.com/Sa2Knight/items/4b97c548a23935d1143c)
+
 # スクリーンショット
 
 **日を指定した公費(生活費の集計取得)**
