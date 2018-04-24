@@ -21,12 +21,12 @@ def send_public_payments_info(date_info, type)
            end
   total  = @zaim.get_total_amount(moneys)
   message_builder = MessageBuilder.new(moneys)
-  @line.reply(
-    text: message_builder.build_all(
-      header: title,
-      footer: "合計 #{total} 円"
-    )
+  message = message_builder.build_all(
+    header: title,
+    footer: "合計 #{total} 円"
   )
+  @line.reply(text: message)
+  Util.write_log(message)
 end
 
 #

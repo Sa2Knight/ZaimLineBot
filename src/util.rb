@@ -1,3 +1,4 @@
+require_relative 'chatwork_client'
 class Util
 
   EVENT_JSON_PATH = '/tmp/line_zime/event.json'
@@ -43,10 +44,11 @@ class Util
   #
   # ログをファイルに出力する
   #
-  def self.write_log(text)
+  def self.write_log(text, with_chatwork: true)
     log = "【#{Time.now}】 #{text}"
     File.open(LOG_FILE_PATH, 'a') do |f|
       f.puts log
     end
+    ChatworkClient.new.sendMessage(log) if with_chatwork
   end
 end
