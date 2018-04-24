@@ -76,6 +76,6 @@ end
 message = Util.get_event_message
 if md = message.match(/(.+)の残額/)
   send_budget_info(md[1])
-elsif md = message.match(/(.+)の(公費|私費)一覧/)
+elsif md = message.match(/(.+)の(公費|私費)/)
   send_public_payments_info(md[1], md[2])
 end
