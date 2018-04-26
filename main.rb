@@ -7,6 +7,16 @@ require_relative 'src/message_builder'
 @line = LineClient.new
 
 #
+# 現在の残材産をLineで通知する
+#
+def send_all_property_info
+  all_property = @zaim.fetch_all_property
+  message = "#{all_property}円"
+  @line.reply(text: message)
+  Util.write_log(message)
+end
+
+#
 # 特定日の公費記録一覧をLineで通知する
 #
 def send_public_payments_info(date_info, type)
@@ -41,6 +51,7 @@ def send_budget_info(month_info)
     "私費: #{private_budget} 円"
   ].join("\n")
   @line.reply(text: text)
+  Util.write_log(text)
 end
 
 #
@@ -74,7 +85,9 @@ end
 
 # メッセージを解析して各種メソッドを呼び出す
 message = Util.get_event_message
-if md = message.match(/(.+)の残額/)
+if message == '全財産'
+  send_all_property_info
+elsif md = message.match(/(.+)の残額/)
   send_budget_info(md[1])
 elsif md = message.match(/(.+)の(公費|私費)/)
   send_public_payments_info(md[1], md[2])

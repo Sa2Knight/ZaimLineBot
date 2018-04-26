@@ -92,6 +92,20 @@ class ZaimClient
   end
 
   #
+  # 現在の総資産(収入-支出)を確認する
+  #
+  def fetch_all_property
+    all_moneys = fetch_moneys(start_date: '1980-01-01')
+    total_income = 0
+    total_payment = 0
+    all_moneys.each do |money|
+      total_income  += money['amount'] if money['mode'] == 'income'
+      total_payment += money['amount'] if money['mode'] == 'payment'
+    end
+    total_income - total_payment
+  end
+
+  #
   # 支払い一覧から、金額の合計を取得する
   #
   def get_total_amount(moneys)
