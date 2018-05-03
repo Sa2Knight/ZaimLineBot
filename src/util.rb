@@ -28,9 +28,7 @@ class Util
   # /tmpに置いてあるファイルを開く
   #
   def self.load_event_json(parse: false)
-    Util.write_log(File.open(EVENT_JSON_PATH).read)
-    event_json = File.open(EVENT_JSON_PATH).read
-    parse ? JSON.parse(event_json) : event_json
+    self.load_file(filename: EVENT_JSON_PATH, parse_json: parse)
   end
 
   #
@@ -46,9 +44,25 @@ class Util
   #
   def self.write_log(text, with_chatwork: true)
     log = "【#{Time.now}】 #{text}"
-    File.open(LOG_FILE_PATH, 'a') do |f|
-      f.puts log
-    end
+    self.write_to_file(text: log, filename: LOG_FILE_PATH, append_mode: true)
     ChatworkClient.new.sendMessage(log) if with_chatwork
+  end
+
+  #
+  # ファイルを読み込む
+  #
+  def self.load_file(filename:, parse_json: false)
+    f = File.read(filename)
+    return parse_json ? JSON.parse(f) : f
+  end
+
+  #
+  # ファイルに文字列を書き込む
+  #
+  def self.write_to_file(text:, filename:, append_mode: false)
+    mode = append_mode ? 'a' : 'w'
+    File.open(filename, mode) do |f|
+      f.puts text
+    end
   end
 end

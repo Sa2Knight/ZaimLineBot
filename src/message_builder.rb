@@ -42,6 +42,7 @@ class MessageBuilder
     #
     def build(money)
       [
+        "[分類] #{ZaimClient.get_category_name(money['category_id'])}",
         "[場所] #{get_place(money)}",
         "[内容] #{get_comment(money)}",
         "[金額] #{money['amount']} 円",

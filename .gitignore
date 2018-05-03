@@ -2,3 +2,4 @@ logs
 vendor
 *.swp
 .bundle
+categories.json

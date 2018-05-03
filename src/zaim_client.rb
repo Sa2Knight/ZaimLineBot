@@ -2,7 +2,9 @@ require 'oauth'
 require 'date'
 
 class ZaimClient
+
   API_URL = 'https://api.zaim.net/v2/'.freeze
+  CATEGORIES_PATH = 'categories.json'.freeze
   POCKET_MONEY = 50000
 
   #
@@ -112,6 +114,19 @@ class ZaimClient
     moneys.reduce(0) { |sum, acm| sum += acm['amount'] }
   end
 
+  #
+  # カテゴリーIDからカテゴリー名を取得する
+  #
+  def self.get_category_name(category_id, fource_forcibly: false)
+    ZaimClient.new.fetch_categories if fource_forcibly
+
+    categories = Util.load_file(
+      filename: CATEGORIES_PATH,
+      parse_json: true
+    )
+    return categories[category_id.to_s] || '未設定'
+  end
+
   private
 
     #
@@ -131,6 +146,24 @@ class ZaimClient
       moneys.select do |money|
         money['mode'] == 'payment' && money['comment'].index('私費')
       end
+    end
+
+    #
+    # カテゴリ一覧を取得する
+    # 取得結果はJSONで永続化する
+    #
+    def fetch_categories
+      categories_map = {}
+      url = 'home/category'
+      response = get(url)
+      response['categories'].each do |category|
+        categories_map[category['id']] = category['name']
+      end
+      Util.write_to_file(
+        text: JSON.generate(categories_map),
+        filename: CATEGORIES_PATH,
+      )
+      return categories_map
     end
 
     #
