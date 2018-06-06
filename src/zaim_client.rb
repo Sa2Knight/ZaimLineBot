@@ -5,7 +5,7 @@ class ZaimClient
 
   API_URL = 'https://api.zaim.net/v2/'.freeze
   CATEGORIES_PATH = 'categories.json'.freeze
-  POCKET_MONEY = 50000
+  POCKET_MONEY = 60000
 
   #
   # ZaimAPIへのアクセストークンを生成する
